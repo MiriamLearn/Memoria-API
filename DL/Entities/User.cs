@@ -6,7 +6,27 @@ using System.Threading.Tasks;
 
 namespace DL.Entities
 {
-    internal class User
+    public class User
     {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
+
+        public DateTime CreatedAt { get; } = DateTime.Now;
+        public int CreatedBy { get; set; } = 0;
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        public int UpdatedBy { get; set; } = 0;
+
+        public User() { }
+
+        public User(int id, string name, string email, string password)
+        {
+            Id = id;
+            Name = name;
+            Email = email;
+            Password = password;
+            CreatedBy = id;
+        }
     }
 }
