@@ -1,6 +1,8 @@
 ﻿using BL.IterfaceServices;
+using BL.services;
 using DL.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -17,49 +19,69 @@ namespace API.Controllers
 
         [HttpGet]
         //[Authorize(Policy = "AdminOnly")]
-        public List<User> GetAllUsers()
+        public async Task<List<User>> GetAllUsers()
         {
-            return userService.GetAllUsers();
+            return await userService.GetAllUsers();
         }
 
         [HttpGet("{id}")]
-        [Authorize(Policy = "AdminOnly")]
-        public User GetUserById(int id)
+        //[Authorize(Policy = "AdminOnly")]
+        public async Task<User> GetUserById(int id)
         {
-            return userService.GetUserById(id);
+            return await userService.GetUserById(id);
         }
 
         [HttpPost]
-        public void AddUser([FromBody] User user)
-        {
-            userService.AddUser(user);
-        }
-
-        [HttpPut("{id}")]
-        //[Authorize]
-        public void UpDateUser(int id, [FromBody] User user)
-        {
-            userService.UpdateUser(id, user);
-        }
-
-        [HttpDelete("{id}")]
-        //[Authorize(Policy = "AdminOnly")]
-        public void RemoveUser(int id)
-        {
-            userService.RemoveUser(id);
-        }
-
-        [HttpPost("login")]
-        public IActionResult LoginUser([FromBody] DL.Entities.Login login)
+        public async Task<IActionResult> AddUser([FromBody] User user)
         {
             try
             {
-                userService.Login(login.Email, login.Password);
-                return Ok("Login successful");
+                await userService.AddUser(user);
+                return Ok(new { success = true, User = user });
             }
             catch (UnauthorizedAccessException)
             {
                 return Unauthorized("Invalid email or password");
+            }
+        }
+
+        [HttpPut("{id}")]
+        [Authorize]
+        public async Task UpDateUser(int id, [FromBody] User user)
+        {
+           await userService.UpdateUser(id, user);
+        }
+
+        [HttpDelete("{id}")]
+        //[Authorize(Policy = "AdminOnly")]
+        public async Task RemoveUser(int id)
+        {
+           await userService.RemoveUser(id);
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginUser([FromBody] DL.Entities.Login login)
+        {
+            try
+            {
+                //await userService.Login(login.Email, login.Password);
+                // return Ok(new { success = true, message = "Login successful", User = new { user.Id, user.Name, user.Email } });
+                var user = await userService.Login(login.Email, login.Password);
+
+                if (user == null)
+                    return Unauthorized(new { Message = "Invalid email or password" });
+                var token = userService.GenerateJwtToken(user.Name, new[] { "User" });
+                return Ok(new
+                {
+                    success = true,
+                    Message = "Login successful",
+                    Token = token,
+                    User = new { user.Id, user.Name, user.Email }
+                });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized(new { success = false, message = "Invalid credentials" });
             }
         }
     }

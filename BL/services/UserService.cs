@@ -2,12 +2,11 @@
 using DL.Entities;
 using DL;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.EntityFrameworkCore;
 
 namespace BL.services
 {
@@ -22,56 +21,55 @@ namespace BL.services
             _configuration = configuration;
         }
 
-        //public string GenerateJwtToken(string username, string[] roles)
-        //{
-        //    var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-        //    var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-        //    var claims = new List<Claim>
-        //{
-        //    new Claim(ClaimTypes.Name, username)
-        //};
-
-        //    // הוספת תפקידים כ-Claims
-        //    foreach (var role in roles)
-        //    {
-        //        claims.Add(new Claim(ClaimTypes.Role, role));
-        //    }
-
-        //    var token = new JwtSecurityToken(
-        //        issuer: _configuration["Jwt:Issuer"],
-        //        audience: _configuration["Jwt:Audience"],
-        //        claims: claims,
-        //        expires: DateTime.Now.AddMinutes(30),
-        //        signingCredentials: credentials
-        //    );
-
-        //    return new JwtSecurityTokenHandler().WriteToken(token);
-        //}
-
-
-        public List<User> GetAllUsers()
+        public string GenerateJwtToken(string username, string[] roles)
         {
-            return _dataContext.Users.ToList();
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, username)
+        };
+
+            // הוספת תפקידים כ-Claims
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(30),
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
-        public User GetUserById(int id)
+
+
+        public async Task<List<User>> GetAllUsers()
+        {
+            //return _dataContext.Users.ToList();
+            var list = await _dataContext.Users.ToListAsync();
+            return list;
+        }
+        public async Task<User> GetUserById(int id)
         {
             //BabyValidation.ValidateBabyId(id);
             return _dataContext.Users.Where(u => u.Id == id).FirstOrDefault();
         }
-        public void AddUser(User user)
+        public async Task AddUser(User user)
         {
-            {
+           
                 _dataContext.Users.Add(user);
-                _dataContext.SaveChanges();
-            }
+              await  _dataContext.SaveChangesAsync();
+            
         }
 
-        public void UpdateUser(int id, User user)
+        public async Task UpdateUser(int id, User user)
         {
-            //BabyValidation.ValidateBabyId(baby.Id);
-            //BabyValidation.ValidateBabyId(id);
-            //BabyValidation.ValidateBabyName(baby.Name);
             var newUser = _dataContext.Users.Where(user => user.Id == id).FirstOrDefault();
             if (newUser != null)
             {
@@ -80,28 +78,29 @@ namespace BL.services
                 newUser.Password = user.Password;
                 newUser.UpdatedAt = DateTime.Now;
                 newUser.UpdatedBy = user.UpdatedBy;
-                _dataContext.SaveChanges();
+                await _dataContext.SaveChangesAsync();
             }
 
         }
-        public void RemoveUser(int id)
+        public async Task RemoveUser(int id)
         {
             var userToDelete = _dataContext.Users.FirstOrDefault(user => user.Id == id);
             if (userToDelete != null)
             {
                 _dataContext.Users.Remove(userToDelete);
-                _dataContext.SaveChanges();
+                await _dataContext.SaveChangesAsync();
             }
 
         }
 
-        public void Login(string email, string password)
+        public async Task<User> Login(string email, string password)
         {
-            User user = _dataContext.Users.FirstOrDefault(u => u.Email == email && u.Password == password);
+            User user =await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == email && u.Password == password);
             if (user == null)
             {
                 throw new UnauthorizedAccessException("Invalid email or password");
             }
+            return user;
         }
     }
 }

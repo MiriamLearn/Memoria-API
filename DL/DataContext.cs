@@ -6,15 +6,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace DL
 {
     public class DataContext: DbContext,IDataContext
     {
-        public DbSet<User> Users { get; set; }
+        //public DataContext(DbContextOptions<DataContext> options) : base(options) { }
 
-        //public DataContext(DbContextOptions<DataContext> options) : base(options)
-        //{
-        //}
+        public DbSet<User> Users { get; set; }
+        public DbSet<Image> Images { get; set; }
+        public DbSet<Album> Albums { get; set; }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -23,9 +25,9 @@ namespace DL
                 new MySqlServerVersion(new Version(9, 0, 0))
             );
         }
-        public int SaveChanges()
+        public async Task<int> SaveChangesAsync()
         {
-            return base.SaveChanges();
+            return await base.SaveChangesAsync();
         }
     }
 }
