@@ -23,7 +23,8 @@ namespace BL.services
 
         public string GenerateJwtToken(string username, string[] roles)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var jwtKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var user = _dataContext.Users.FirstOrDefault(u => u.Name == username);

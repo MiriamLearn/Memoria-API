@@ -23,7 +23,7 @@ namespace BL.services
         public AICollageService(HttpClient httpClient, IConfiguration configuration, ILogger<AICollageService> logger)
         {
             _httpClient = httpClient;
-            _apiKey = configuration["Groq:ApiKey"];
+            _apiKey = configuration["Groq_API_KEY"];
             _model = configuration["Groq:Model"] ?? "llama-3.1-8b-instant";
             _logger = logger;
         }
