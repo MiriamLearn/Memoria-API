@@ -14,10 +14,11 @@ namespace DL.Entities
         public DateTime CreatedAt { get; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
         public bool IsDeleted { get; set; }=false;
-     
+        public int UserId { get; set; }
 
-        public Album(int id, string name)
+        public Album(int id, string name,int userId)
         {
+            UserId = userId;
             Id = id;
             Name = name;
         }

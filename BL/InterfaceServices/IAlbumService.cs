@@ -9,7 +9,7 @@ namespace BL.InterfaceServices
 {
     public interface IAlbumService
     {
-        public Task<List<Album>> GetAllAlbums();
+        public Task<List<Album>> GetAllAlbums(int userId);
         public Task<Album> GetAlbumById(int id);
         //public Task<List<Album>> GetUserAlbums(int userId);
         public Task<Album> AddAlbum(Album album);

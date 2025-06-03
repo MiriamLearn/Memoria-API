@@ -33,7 +33,7 @@ namespace BL.services
             }
 
             await _dataContext.Images.AddAsync(image);
-            album.imageList.Add(image);
+            //album.imageList.Add(image);
             await _dataContext.SaveChangesAsync();
         }
 

@@ -1,10 +1,13 @@
 ﻿using BL.InterfaceServices;
 using DL.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AlbumController : ControllerBase
@@ -17,12 +20,21 @@ namespace API.Controllers
             _albumService = albumService;
         }
 
+      
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Album>>> GetAllAlbums()
         {
             try
             {
-                var albums = await _albumService.GetAllAlbums();
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim))
+                {
+                    return Unauthorized("User is not authenticated or token is missing required claim.");
+                }
+                var userId = int.Parse(userIdClaim);
+
+                //var userId =int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var albums = await _albumService.GetAllAlbums(userId);
                 return Ok(albums);
             }
             catch (Exception ex)

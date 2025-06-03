@@ -35,19 +35,19 @@ namespace API.Controllers
 
             string url = _s3Client.GetPreSignedURL(request);
 
-            var image = new DL.Entities.Image
-            {
-                Name = imageName,
-                Type = 0, // יש להגדיר את סוג הקובץ בהתאם
-                Size = 0, // יש לעדכן את הגודל לאחר ההעלאה
-                AlbumId = albumId,
-                S3URL = $"https://memoria-bucket-testpnoren.s3.amazonaws.com/{imageName}",
-                IsDeleted = false,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+            //var image = new DL.Entities.Image
+            //{
+            //    Name = imageName,
+            //    Type = 0, // יש להגדיר את סוג הקובץ בהתאם
+            //    Size = 0, // יש לעדכן את הגודל לאחר ההעלאה
+            //    AlbumId = albumId,
+            //    S3URL = $"https://memoria-bucket-testpnoren.s3.amazonaws.com/{imageName}",
+            //    IsDeleted = false,
+            //    CreatedAt = DateTime.UtcNow,
+            //    UpdatedAt = DateTime.UtcNow
+            //};
 
-            await _imageService.AddImage(image);
+            //await _imageService.AddImage(image);
             return Ok(new { url });
         }
     }

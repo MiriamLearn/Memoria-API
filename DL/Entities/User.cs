@@ -13,7 +13,6 @@ namespace DL.Entities
         public string Email { get; set; }
         public string Password { get; set; }
         public List<Album> albumList { get; set; } = new List<Album>();
-
         public DateTime CreatedAt { get; } = DateTime.Now;
         public int CreatedBy { get; set; } = 0;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;

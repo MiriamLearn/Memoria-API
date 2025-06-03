@@ -26,9 +26,17 @@ namespace BL.services
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
+            var user = _dataContext.Users.FirstOrDefault(u => u.Name == username);
+            if (user == null)
+            {
+                throw new ArgumentException("User not found.");
+            }
+            var userId = user.Id;
+
             var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, username)
+            new Claim(ClaimTypes.Name, username),
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
         };
 
             // הוספת תפקידים כ-Claims

@@ -2,6 +2,8 @@
 using BL.InterfaceServices;
 using DL.Entities;
 using BL.services;
+using System.Net.Http;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
@@ -10,9 +12,13 @@ namespace API.Controllers
     public class ImageController : ControllerBase
     {
         private readonly IImageService _imageService;
-        public ImageController(IImageService fileService)
+        private readonly HttpClient _httpClient;
+        private readonly ILogger<ImageController> _logger;
+        public ImageController(IImageService fileService, HttpClient httpClient, ILogger<ImageController> logger)
         {
             _imageService = fileService;
+            _httpClient = httpClient;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -33,6 +39,47 @@ namespace API.Controllers
             catch (KeyNotFoundException)
             {
                 return NotFound();
+            }
+        }
+
+
+        [HttpGet("proxy")]
+        [Authorize]
+        public async Task<IActionResult> ProxyImage([FromQuery] string url)
+        {
+            try
+            {
+                // בדיקת אבטחה - רק URLs מה-S3 bucket שלך
+                if (string.IsNullOrEmpty(url) || !url.Contains("memoria-bucket-testpnoren.s3.us-east-1.amazonaws.com"))
+                {
+                    _logger.LogWarning($"Invalid image URL attempted: {url}");
+                    return BadRequest("Invalid image URL");
+                }
+
+                _logger.LogInformation($"Proxying image: {url}");
+
+                var response = await _httpClient.GetAsync(url);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsByteArrayAsync();
+                    var contentType = response.Content.Headers.ContentType?.MediaType ?? "image/jpeg";
+
+                    // הוספת CORS headers
+                    Response.Headers.Add("Access-Control-Allow-Origin", "*");
+                    Response.Headers.Add("Access-Control-Allow-Methods", "GET");
+                    Response.Headers.Add("Access-Control-Allow-Headers", "*");
+
+                    return File(content, contentType);
+                }
+
+                _logger.LogWarning($"Failed to fetch image: {response.StatusCode} for URL: {url}");
+                return NotFound($"Image not found: {response.StatusCode}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error fetching image from URL: {url}");
+                return BadRequest($"Error fetching image: {ex.Message}");
             }
         }
 

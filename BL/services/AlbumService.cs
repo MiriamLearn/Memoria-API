@@ -45,20 +45,21 @@ namespace BL.services
             return album ?? throw new KeyNotFoundException("Album not found");
         }
 
-        public async Task<List<Album>> GetAllAlbums()
+        public async Task<List<Album>> GetAllAlbums(int userId)
         {
             //return await _dataContext.Albums.ToListAsync();
             return await _dataContext.Albums
-                            .Where(a => !a.IsDeleted)
+                            .Where( a => a.UserId == userId && !a.IsDeleted)
                             .ToListAsync();
         }
         public async Task UpdateAlbum(int id, Album album)
         {
-            var Album = await GetAlbumById(id);
-            if (Album == null)
+            var existingAlbum = await GetAlbumById(id);
+            if (existingAlbum == null)
                 throw new KeyNotFoundException("Album not found");
-            Album.Name = album.Name;
-            Album.UpdatedAt = DateTime.Now;
+
+            existingAlbum.Name = album.Name;
+            existingAlbum.UpdatedAt = DateTime.Now;
             await _dataContext.SaveChangesAsync();
         }
 
@@ -73,8 +74,8 @@ namespace BL.services
             if (albumToDelete == null)
                 throw new KeyNotFoundException("Album not found");
 
-            if (albumToDelete.imageList.Count > 0)
-                throw new InvalidOperationException("Cannot delete album with images");
+            //if (albumToDelete.imageList.Count > 0)
+            //    throw new InvalidOperationException("Cannot delete album with images");
 
             albumToDelete.IsDeleted = true;
             await _dataContext.SaveChangesAsync();
