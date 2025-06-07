@@ -64,7 +64,7 @@ builder.Services.AddScoped<IAICollageService, AICollageService>();
 
 var app = builder.Build();
 
-app.UseCors("AllowReactApp");
+//app.UseCors("AllowReactApp");
 
  //Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
