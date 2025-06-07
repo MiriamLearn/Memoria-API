@@ -20,8 +20,15 @@ namespace DL
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            var connectionString = Environment.GetEnvironmentVariable("Clever_DB_Connection");
+
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new InvalidOperationException("Missing environment variable: Clever_DB_Connection");
+            }
+
             optionsBuilder.UseMySql(
-               @"Server=bbr25qmtjwhzicpw3uro-mysql.services.clever-cloud.com;Port=3306;Database=bbr25qmtjwhzicpw3uro;User=undtetqpywbhigr5;Password=TepmHiOc7xJGmaXKzf6H",
+                connectionString,
                 new MySqlServerVersion(new Version(9, 0, 0))
             );
         }
