@@ -41,15 +41,21 @@ builder.Services.AddAuthorization(options =>
 });
 
 // Add services to the container.
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowReactApp",
+//        policy => policy.AllowAnyOrigin()
+//                        .AllowAnyMethod()
+//                        .AllowAnyHeader());
+//});
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp",
+    options.AddPolicy("AllowFrontendApps",
         policy => policy.AllowAnyOrigin()
                         .AllowAnyMethod()
                         .AllowAnyHeader());
 });
-
-
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -64,7 +70,7 @@ builder.Services.AddScoped<IAICollageService, AICollageService>();
 
 var app = builder.Build();
 
-//app.UseCors("AllowReactApp");
+
 
  //Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
@@ -74,7 +80,8 @@ app.UseSwagger();
 //}
 
 app.UseHttpsRedirection();
-app.UseCors("AllowReactApp");
+//app.UseCors("AllowReactApp");
+app.UseCors("AllowFrontendApps");
 app.UseAuthentication();
 app.UseAuthorization();
 
